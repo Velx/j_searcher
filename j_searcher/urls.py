@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 
 from searcher import urls as searcher_urls
+from searcher.views import index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('', include(searcher_urls, namespace='searcher')),
+    path('', index, name='index'),
 ]
 
 if settings.DEBUG:

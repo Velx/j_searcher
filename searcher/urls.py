@@ -3,6 +3,8 @@ from django.contrib.auth.views import logout_then_login, LoginView
 from django.views.generic import CreateView
 from searcher.forms import CustomCreationForm
 
+from searcher.views import index
+
 app_name = 'searcher'
 
 urlpatterns = [

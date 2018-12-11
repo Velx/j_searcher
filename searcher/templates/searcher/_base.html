@@ -16,6 +16,31 @@
 </head>
 <body>
 
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="{% url 'index' %}">J-Updater</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+              <!-- TODO: блок для active страниц -->
+            <li class="active"><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="#about">Manga Updates</a></li>
+            <li><a href="#contact">Anime Updated</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              {% if user.is_anonymous %}
+                  <li><a href="{% url 'searcher:register' %}">Register</a></li>
+                  <li><a href="{% url 'searcher:login' %}">Login</a></li>
+              {% else %}
+                  <li><a href="#">{{ user }}</a></li>
+                  <li><a href="{% url 'searcher:logout' %}">Logout</a></li>
+              {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
   <main>
     {% block content %}
     {% endblock %}

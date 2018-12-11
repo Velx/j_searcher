@@ -3,7 +3,7 @@
 {% block content %}
 
 <h1>Register, please!</h1>
-
+<!--TODO: Add logined check-->
 <form action="{% url 'searcher:register' %}" method="POST">
     {% csrf_token %}
     {{ form.as_p }}
