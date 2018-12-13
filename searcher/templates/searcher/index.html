@@ -2,6 +2,84 @@
 
 {% block content %}
 
-<p>{{ user }}</p>
+{% if user.is_anonymous %}
+
+<div class="container">
+
+      <!-- Main component for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>Вы не авторизированы</h1>
+        <p>Пожалуйста, авторизируйтесь или пройдите регистрацию для того, чтобы получить доступ к функционалу сайта</p>
+      </div>
+</div> <!-- /container -->
+
+{% else %}
+
+<div class="container">
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading text-center "><h4><strong>Manga</strong></h4></div>
+
+      <!-- Table -->
+      <table class="table">
+          <!-- Headers -->
+          <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Chapters</th>
+          </tr>
+          {% for manga in mangas %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ manga.title }}</td>
+              <td>
+                    <div class="row">
+                  <form action="{% url 'searcher:chap_inc' %}" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="pk" value={{ manga.pk }}>
+                      <button type="submit" class="btn btn-link col-md-4">
+                          <span class="glyphicon glyphicon-plus"></span>
+                      </button>
+                  </form>
+                  <div class="col-md-4">{{ manga.last_chap }}</div>
+                  <form action="{% url 'searcher:chap_dec' %}" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="pk" value={{ manga.pk }}>
+                      <button type="submit" class="btn btn-link col-md-4">
+                          <span class="glyphicon glyphicon-minus"></span>
+                      </button>
+                  </form>
+                  </div>
+              </td>
+           </tr>
+          {% endfor %}
+      </table>
+    </div>
+    <hr>
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading text-center "><h4><strong>Anime</strong></h4></div>
+
+      <!-- Table -->
+      <table class="table">
+          <!-- Headers -->
+          <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Episodes</th>
+          </tr>
+          {% for anime in animes %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ anime.title }}</td>
+              <td>{{ anime.last_chap }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+    </div>
+    <hr>
+</div> <!-- /container -->
+
+{% endif %}
 
 {% endblock %}
