@@ -7,15 +7,23 @@
 <div class="container">
 
       <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
+      <div class="jumbotron text-center">
         <h1>Вы не авторизированы</h1>
-        <p>Пожалуйста, авторизируйтесь или пройдите регистрацию для того, чтобы получить доступ к функционалу сайта</p>
+        <h3>Пожалуйста, авторизируйтесь или пройдите регистрацию для того, чтобы получить доступ к функционалу сайта</h3>
       </div>
 </div> <!-- /container -->
 
 {% else %}
 
 <div class="container">
+
+    {% if mangas|length_is:'0' and animes|length_is:'0' %}
+        <div class="jumbotron text-center">
+            <h1>Ваш MAL-аккаунт пуст</h1>
+            <h3>Пожалуйста, добавьте мангу или аниме в ваш MAL-аккаунт, а затем проведите синхронизацию в профиле</h3>
+        </div>
+    {% endif %}
+    {% if mangas|length > 0 %}
     <div class="panel panel-default">
       <!-- Default panel contents -->
       <div class="panel-heading text-center "><h4><strong>Manga</strong></h4></div>
@@ -56,6 +64,8 @@
       </table>
     </div>
     <hr>
+    {% endif %}
+    {% if animes|length > 0 %}
     <div class="panel panel-default">
       <!-- Default panel contents -->
       <div class="panel-heading text-center "><h4><strong>Anime</strong></h4></div>
@@ -72,12 +82,31 @@
           <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ anime.title }}</td>
-              <td>{{ anime.last_chap }}</td>
-          </tr>
+              <td>
+                    <div class="row">
+                  <form action="{% url 'searcher:chap_inc' %}" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="pk" value={{ anime.pk }}>
+                      <button type="submit" class="btn btn-link col-md-4">
+                          <span class="glyphicon glyphicon-plus"></span>
+                      </button>
+                  </form>
+                  <div class="col-md-4">{{ anime.last_chap }}</div>
+                  <form action="{% url 'searcher:chap_dec' %}" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="pk" value={{ anime.pk }}>
+                      <button type="submit" class="btn btn-link col-md-4">
+                          <span class="glyphicon glyphicon-minus"></span>
+                      </button>
+                  </form>
+                  </div>
+              </td>
+           </tr>
           {% endfor %}
       </table>
     </div>
     <hr>
+    {% endif %}
 </div> <!-- /container -->
 
 {% endif %}

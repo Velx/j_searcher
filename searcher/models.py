@@ -53,8 +53,8 @@ class CustomUser(AbstractUser):
     mal_account = models.CharField(max_length=40)
     users_titles = models.ManyToManyField('TitleList', blank=True, related_name='users',
                                           through='TitleInProgress')
-    manga_translator = models.ForeignKey('MangaTranslators', null=True, related_name='users', on_delete=models.PROTECT)
-    anime_translator = models.ForeignKey('AnimeTranslators', null=True, related_name='users', on_delete=models.PROTECT)
+    manga_translator = models.ForeignKey('MangaTranslators', null=True, related_name='users', on_delete=models.SET_NULL)
+    anime_translator = models.ForeignKey('AnimeTranslators', null=True, related_name='users', on_delete=models.SET_NULL)
     last_check = models.DateTimeField(default=None, null=True)
 
     def mark_cheked(self, commit=True):
@@ -64,8 +64,8 @@ class CustomUser(AbstractUser):
 
 
 class TitleInProgress(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    title = models.ForeignKey(TitleList, on_delete=models.PROTECT)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    title = models.ForeignKey(TitleList, on_delete=models.CASCADE)
     last_chap = models.IntegerField()
 
 

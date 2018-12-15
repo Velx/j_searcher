@@ -1,0 +1,43 @@
+[
+  {
+    "model": "searcher.MangaTranslators",
+    "pk": 1,
+    "fields": {
+      "name": "Mangadex",
+      "url": "mangadex.org"
+    }
+  },
+  {
+    "model": "searcher.MangaTranslators",
+    "pk": 2,
+    "fields": {
+      "name": "Mangafox",
+      "url": "fanfox.net"
+    }
+  },
+  {
+    "model": "searcher.MangaTranslators",
+    "pk": 3,
+    "fields": {
+      "name": "Mangatail",
+      "url": "mangatail.me"
+    }
+  },
+  {
+    "model": "searcher.AnimeTranslators",
+    "pk": 1,
+    "fields": {
+      "name": "HorribleSubs",
+      "url": "horriblesubs.info"
+    }
+  },
+  {
+    "model": "searcher.AnimeTranslators",
+    "pk": 2,
+    "fields": {
+      "name": "Crunchyroll",
+      "url": "crunchyroll.com"
+    }
+  }
+]
+

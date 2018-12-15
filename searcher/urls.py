@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import logout_then_login, LoginView
 from django.views.generic import CreateView
 from searcher.forms import CustomCreationForm
-from searcher.views import ChapInc, ChapDec
+from searcher.views import ChapInc, ChapDec, UserProfile, MalUpdate, MangaTranslatorsSet, AnimeTranslatorsSet
 
 app_name = 'searcher'
 
@@ -19,7 +19,12 @@ urlpatterns = [
         success_url='/',
     ), name='register'),
 
-    path('/title/inc', ChapInc.as_view(), name='chap_inc'),
-    path('/title/dec', ChapDec.as_view(), name='chap_dec'),
+    path('title/inc', ChapInc.as_view(), name='chap_inc'),
+    path('title/dec', ChapDec.as_view(), name='chap_dec'),
 
+    path('user/<str:username>', UserProfile.as_view(), name='profile'),
+    path('update_mal', MalUpdate.as_view(), name='update_mal' ),
+
+    path('mtrans_set', MangaTranslatorsSet.as_view(), name='manga_translator_set' ),
+    path('atrans_set', AnimeTranslatorsSet.as_view(), name='anime_translator_set' ),
 ]

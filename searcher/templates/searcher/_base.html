@@ -34,7 +34,7 @@
                   <li><a href="{% url 'searcher:register' %}">Register</a></li>
                   <li><a href="{% url 'searcher:login' %}">Login</a></li>
               {% else %}
-                  <li><a href="#">{{ user }}</a></li>
+                  <li><a href="{% url 'searcher:profile' user %}">{{ user }}</a></li>
                   <li><a href="{% url 'searcher:logout' %}">Logout</a></li>
               {% endif %}
           </ul>

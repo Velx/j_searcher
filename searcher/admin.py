@@ -18,8 +18,16 @@ class TitleInProgressInline(admin.TabularInline):
 class CustomUserAdmin(admin.ModelAdmin):
     inlines = (TitleInProgressInline,)
 
+
+class MangaTranslatorsAdmin(admin.ModelAdmin):
+    pass
+
+
+class AnimeTranslatorsAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(CustomUser, CustomUserAdmin)
-
-
 admin.site.register(TypeForList, TypeAdmin)
 admin.site.register(TitleList, TitleAdmin)
+admin.site.register(MangaTranslators, MangaTranslatorsAdmin)
+admin.site.register(AnimeTranslators, AnimeTranslatorsAdmin)

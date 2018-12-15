@@ -41,9 +41,13 @@ INSTALLED_APPS = [
     # debug:
     'debug_toolbar',
 
+    #crispy
+    'crispy_forms',
     # my apps:
     'searcher',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -142,3 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+FIXTURE_DIRS = (
+   os.path.join(BASE_DIR, 'Fixtures'),
+)
