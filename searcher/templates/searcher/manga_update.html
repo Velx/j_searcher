@@ -1,0 +1,56 @@
+{% extends 'searcher/_base.html' %}
+
+{% block content %}
+
+
+{% if user.is_anonymous %}
+
+<div class="container">
+
+      <!-- Main component for a primary marketing message or call to action -->
+      <div class="jumbotron text-center">
+        <h1>Вы не авторизированы</h1>
+        <h3>Пожалуйста, авторизируйтесь или пройдите регистрацию для того, чтобы получить доступ к функционалу сайта</h3>
+      </div>
+</div> <!-- /container -->
+{% else %}
+
+
+<div class="container">
+    {% if mangas|length_is:'0' %}
+        <div class="jumbotron text-center">
+            <h1>Ваш MAL-аккаунт пуст или совпадения на выбранном сайте не найдены.</h1>
+            <h3>Пожалуйста, добавьте мангу в ваш MAL-аккаунт, а затем проведите синхронизацию в профиле, либо выберите другой сайт-переводчик</h3>
+        </div>
+    {% endif %}
+    {% if mangas|length > 0 %}
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading text-center "><h4><strong>Manga</strong></h4></div>
+
+      <!-- Table -->
+      <table class="table">
+          <!-- Headers -->
+          <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th class="align-right">Chapters</th>
+          </tr>
+          {% for tittle, chapter in mangas.items %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ tittle }}</td>
+              <td class="align-right">
+                  <div class="row">
+                    <div class="col-md-1 text-center">{{ chapter }}</div>
+                  </div>
+              </td>
+           </tr>
+          {% endfor %}
+      </table>
+    </div>
+    <hr>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

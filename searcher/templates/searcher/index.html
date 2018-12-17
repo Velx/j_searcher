@@ -41,19 +41,19 @@
               <td>{{ forloop.counter }}</td>
               <td>{{ manga.title }}</td>
               <td>
-                    <div class="row">
+                  <div class="row">
                   <form action="{% url 'searcher:chap_inc' %}" method="POST">
                       {% csrf_token %}
                       <input type="hidden" name="pk" value={{ manga.pk }}>
-                      <button type="submit" class="btn btn-link col-md-4">
+                      <button type="submit" class="btn btn-link col-md-1">
                           <span class="glyphicon glyphicon-plus"></span>
                       </button>
                   </form>
-                  <div class="col-md-4">{{ manga.last_chap }}</div>
+                  <div class="col-md-1 text-center">{{ manga.last_chap }}</div>
                   <form action="{% url 'searcher:chap_dec' %}" method="POST">
                       {% csrf_token %}
                       <input type="hidden" name="pk" value={{ manga.pk }}>
-                      <button type="submit" class="btn btn-link col-md-4">
+                      <button type="submit" class="btn btn-link col-md-1">
                           <span class="glyphicon glyphicon-minus"></span>
                       </button>
                   </form>

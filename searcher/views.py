@@ -6,9 +6,9 @@ from searcher.models import TitleInProgress, TypeForList, TitleList, MangaTransl
 from searcher.forms import MalUpdateForm, MangaTranslatorsForm, AnimeTranslatorsForm
 
 import requests as req
-import re
-import json
+import re, json, time
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 # Create your views here.
 
 # def index(request):
@@ -131,3 +131,200 @@ class AnimeTranslatorsSet(View):
             request.user.anime_translator = AnimeTranslators.objects.get(pk=request.POST['anime_translator'])
             request.user.save()
         return HttpResponseRedirect('user/' + request.user.username)
+
+
+def mfox_search(title, last_chap, store):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
+    }
+    # TODO: проверка на точное совпадение названий
+    # TODO: исправление названий
+    url = f'https://fanfox.net/search?title=&genres=&st=1&sort=4&stype=1&name_method=cw&name={title}&author_method=ew&author=&artist_method=cw&artist=&type=&rating_method=eq&rating=&released_method=eq&released='
+    http = req.get(url, headers)
+    soup = BeautifulSoup(http.text, 'lxml')
+    data = soup.find('ul', attrs={'class': 'manga-list-4-list line'})
+    if data == None:
+        if ":" in title:
+            title = title.split(":")[0]
+            url = f'https://fanfox.net/search?title=&genres=&st=1&sort=4&stype=1&name_method=cw&name={title}&author_method=ew&author=&artist_method=cw&artist=&type=&rating_method=eq&rating=&released_method=eq&released='
+            http = req.get(url, headers)
+            soup = BeautifulSoup(http.text, 'lxml')
+            data = soup.find('ul', attrs={'class': 'manga-list-4-list line'})
+        else:
+            title = "".join(title.split())
+            url = f'https://fanfox.net/search?title=&genres=&st=1&sort=4&stype=1&name_method=cw&name={title}&author_method=ew&author=&artist_method=cw&artist=&type=&rating_method=eq&rating=&released_method=eq&released='
+            http = req.get(url, headers)
+            soup = BeautifulSoup(http.text, 'lxml')
+            data = soup.find('ul', attrs={'class': 'manga-list-4-list line'})
+    name = data.findAll('p', attrs={'class': 'manga-list-4-item-title'})
+    l_c = data.findAll('p', attrs={'class': 'manga-list-4-item-tip'})[1::3]
+    for i, l in zip(name, l_c):  # TODO: выборка только 1
+        cha = re.search(r'Ch\.\d+', l.get_text())
+        if last_chap < float(cha.group(0)[3:]):
+            store[title] = cha.group(0)[3:]
+        else:
+            break
+
+def mtail_search(title, last_chap, store):
+    # TODO: проверить работоспособность на нормальном аккаунте
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
+    }
+    url = f'https://www.mangatail.me/search/node/{title}'
+    http = req.get(url, headers)
+    soup = BeautifulSoup(http.text, 'lxml')
+    data = soup.find('ol', attrs={'class': 'search-results node-results'})
+    if data == None:
+        pass
+    else:
+        data =data.findAll('a')
+        for manga in data:
+            print(manga.string)
+            if manga.string.startswith(title):
+                http = req.get(manga['href'], headers)
+                soup = BeautifulSoup(http.text, 'lxml')
+                _field = soup.find('tbody').find('tr')
+                chapter = _field.find('a').string
+                lchapter = chapter.split(' ')[-1]
+                if last_chap < float(lchapter):
+                    store[title] = lchapter
+                else:
+                    break
+            break
+
+
+def mdex_search(title, last_chap, store):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0',
+        'mangadex_display_lang': 1,
+        'mangadex_filter_langs': 1,
+        'mangadex_theme': 1
+    }
+    cookie = {'mangadex_filter_langs': "1"}
+    url = f'https://mangadex.org/?page=search&title={title}&genres_exc=7'
+    http = req.get(url, headers)
+    soup = BeautifulSoup(http.text, 'lxml')
+    data = soup.findAll('div', attrs={'class': 'manga-entry col-lg-6 border-bottom pl-0 my-1'})
+    if data == None:
+        print(title + 'Not found')
+    else:
+        for item in data:
+            manga = item.find('a', attrs={'class': 'ml-1 manga_title text-truncate'})
+            if manga.string.startswith(title):
+                http = req.get('https://mangadex.org' + manga['href'], headers, cookies=cookie)
+                soup = BeautifulSoup(http.text, 'lxml')
+                _field = soup.find('div', attrs={'class': 'col col-lg-5 row no-gutters align-items-center flex-nowrap text-truncate pr-1 order-lg-2'})
+                if _field == None:
+                    pass
+                else:
+                    _field = _field.find('a').text
+                    print(_field)
+                    print(title)
+                    nchap = re.search(r'(Ch\. \d+.\d)|(Ch\. \d+)', _field).group(0)[4:]
+                    print(title + " " + nchap)
+                    if last_chap < float(nchap):
+                        store[title] = nchap
+                    else:
+                        break
+                break
+
+
+class MangaUpdates(View):
+
+    template_name = 'searcher/manga_update.html'
+
+    def get(self, request, *args, **kwargs):
+        mangas = TitleInProgress.objects.filter(
+            user__username=request.user,
+            title__type__type='MG')
+        store = dict()
+
+        if request.user.manga_translator == MangaTranslators.objects.get(name='Mangafox'):
+            for manga in mangas:
+                mfox_search(str(manga.title), manga.last_chap, store)
+        elif request.user.manga_translator == MangaTranslators.objects.get(name='Mangatail'):
+            for manga in mangas:
+                mtail_search(str(manga.title), manga.last_chap, store)
+        elif request.user.manga_translator == MangaTranslators.objects.get(name='Mangadex'):
+            for manga in mangas:
+                mdex_search(str(manga.title), manga.last_chap, store)
+        else:
+            HttpResponseRedirect('/')
+        return render(request, self.template_name, {'mangas':store})
+
+
+def crunch_search(anime_title, w_episodes, v_url, store):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0',
+    }
+    url = 'https://myanimelist.net' + v_url
+    http = req.get(url, headers)
+    soup = BeautifulSoup(http.text, 'lxml')
+    if not 'Too Many Requests' in soup.text:
+        data = soup.find('div', attrs={'class': 'video-list-outer'}).find('span', attrs={'class': 'title'})
+        if float(data.contents[0].split()[1]) > float(w_episodes):
+            store[anime_title] = data.contents[0].split()[1]
+            time.sleep(0.200)
+        else:
+            time.sleep(0.200)
+    else:
+        time.sleep(0.200)
+        crunch_search(anime_title, w_episodes, v_url, store)
+
+
+def hsubs_search(anime_title, w_episodes, store):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0',
+    }
+    url = f'https://horriblesubs.info/api.php?method=search&value={anime_title}'
+    http = req.get(url, headers)
+    soup = BeautifulSoup(http.text, 'lxml')
+    data = soup.find('li')
+    if data == None:
+        if 'nd Season' in anime_title:
+            a_t = re.split(r'\dnd Season', anime_title)[0]
+            url = f'https://horriblesubs.info/api.php?method=search&value={a_t}'
+            http = req.get(url, headers)
+            soup = BeautifulSoup(http.text, 'lxml')
+            data = soup.find('li')
+            _date = data.find('span', attrs={'class': 'latest-releases-date'}).string
+            delta = None
+            if not _date in ['Today', 'Yesterday']:
+                _date = datetime.strptime(_date, '%m/%d/%y').date()
+                delta = (datetime.today().date() - _date).days
+            if _date == 'Today' or _date =='Yesterday' or delta <= 14:
+                data = data.find('strong')
+                if float(data.string) > float(w_episodes):
+                    store[anime_title] = data.string
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+    else:
+        data = data.find('strong')
+        if float(data.string) > float(w_episodes):
+            store[anime_title] = data.string
+        else:
+            pass
+
+
+class AnimeUpdates(View):
+
+    template_name = 'searcher/anime_update.html'
+
+    def get(self, request, *args, **kwargs):
+        animes = TitleInProgress.objects.filter(
+            user__username=request.user,
+            title__type__type='AN')
+        store = dict()
+        if request.user.anime_translator == AnimeTranslators.objects.get(name='HorribleSubs'):
+            for anime in animes:
+                hsubs_search(str(anime.title), anime.last_chap, store)
+        elif request.user.anime_translator == AnimeTranslators.objects.get(name='Crunchyroll'):
+            for anime in animes:
+                crunch_search(str(anime.title), anime.last_chap, str(anime.title.url), store)
+        else:
+            HttpResponseRedirect('/')
+        return render(request, self.template_name, {'animes':store})
