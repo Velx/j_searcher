@@ -25,10 +25,11 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
               <!-- TODO: блок для active страниц -->
-              <!-- TODO: Проверка обновлений для авторизованных пользователей -->
-            <li class="active"><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            {% if user.is_authenticated %}
             <li><a href="{% url 'searcher:manga_updates' %}">Manga Updates</a></li>
-            <li><a href="{% url 'searcher:anime_updates' %}">Anime Updated</a></li>
+            <li><a href="{% url 'searcher:anime_updates' %}">Anime Updates</a></li>
+            {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
               {% if user.is_anonymous %}

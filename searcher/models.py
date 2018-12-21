@@ -2,14 +2,11 @@ from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
 from django.contrib.auth.models import  AbstractUser
-from django.utils import timezone
 
 import requests as req
 import re
 import json
 from bs4 import BeautifulSoup
-from lxml import html
-# Create your models here.
 
 
 class TypeForList(models.Model):
@@ -49,18 +46,12 @@ class AnimeTranslators(models.Model):
 
 
 class CustomUser(AbstractUser):
-    # TODO: сделать связи к остальным таблицам
     mal_account = models.CharField(max_length=40)
     users_titles = models.ManyToManyField('TitleList', blank=True, related_name='users',
                                           through='TitleInProgress')
     manga_translator = models.ForeignKey('MangaTranslators', null=True, related_name='users', on_delete=models.SET_NULL)
     anime_translator = models.ForeignKey('AnimeTranslators', null=True, related_name='users', on_delete=models.SET_NULL)
-    last_check = models.DateTimeField(default=None, null=True)
 
-    def mark_cheked(self, commit=True):
-        self.last_check = timezone.now()
-        if commit:
-            self.save()
 
 
 class TitleInProgress(models.Model):

@@ -9,12 +9,6 @@ import requests as req
 import re, json, time
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-# Create your views here.
-
-# def index(request):
-#     if request.method == 'GET':
-#         return render(request, 'searcher/index.html', )
-#     return HttpResponse(status=405)
 
 class Index(View):
     template_name = 'searcher/index.html'
@@ -114,7 +108,6 @@ class MalUpdate(View):
                 person_anime.save()
         return HttpResponseRedirect('user/' + request.user.username)
 
-
 class MangaTranslatorsSet(View):
     def post(self, request, *args, **kwargs):
         form = MangaTranslatorsForm(request.user, request.POST)
@@ -122,7 +115,6 @@ class MangaTranslatorsSet(View):
             request.user.manga_translator = MangaTranslators.objects.get(pk=request.POST['manga_translator'])
             request.user.save()
         return HttpResponseRedirect('user/' + request.user.username)
-
 
 class AnimeTranslatorsSet(View):
     def post(self, request, *args, **kwargs):
@@ -132,13 +124,10 @@ class AnimeTranslatorsSet(View):
             request.user.save()
         return HttpResponseRedirect('user/' + request.user.username)
 
-
 def mfox_search(title, last_chap, store):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
     }
-    # TODO: проверка на точное совпадение названий
-    # TODO: исправление названий
     url = f'https://fanfox.net/search?title=&genres=&st=1&sort=4&stype=1&name_method=cw&name={title}&author_method=ew&author=&artist_method=cw&artist=&type=&rating_method=eq&rating=&released_method=eq&released='
     http = req.get(url, headers)
     soup = BeautifulSoup(http.text, 'lxml')
@@ -166,7 +155,6 @@ def mfox_search(title, last_chap, store):
             break
 
 def mtail_search(title, last_chap, store):
-    # TODO: проверить работоспособность на нормальном аккаунте
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/45.0'
     }
@@ -309,9 +297,7 @@ def hsubs_search(anime_title, w_episodes, store):
         else:
             pass
 
-
 class AnimeUpdates(View):
-
     template_name = 'searcher/anime_update.html'
 
     def get(self, request, *args, **kwargs):
